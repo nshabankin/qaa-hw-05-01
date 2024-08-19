@@ -60,16 +60,16 @@ class DeliveryTest {
 
     @Test
     void shouldNotPlanIfInvalidCity() {
-        var validUser = DataGenerator.Registration.generateUser("ru");
+        var invalidCityUser = DataGenerator.Registration.generateInvalidCityUser("ru");
         var daysToAddForFirstMeeting = 4;
         var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
 
         // Заполнение заявки на первую дату
-        cityField.setValue("Новокузнецк");
+        cityField.setValue(invalidCityUser.getCity());
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(firstMeetingDate);
-        nameField.setValue(validUser.getName());
-        phoneField.setValue(validUser.getPhone());
+        nameField.setValue(invalidCityUser.getName());
+        phoneField.setValue(invalidCityUser.getPhone());
         agreementCheckbox.$(".checkbox__box").click();
         agreementCheckbox.$(".checkbox__control").shouldBe(selected);
         submitButton.click();
@@ -79,18 +79,18 @@ class DeliveryTest {
 
     @Test
     void shouldPlanIfNameContainsSpecificSymbols() {
-        var validUser = DataGenerator.Registration.generateUser("ru");
+        var invalidNameUser = DataGenerator.Registration.generateInvalidNameUser("ru");
         var daysToAddForFirstMeeting = 4;
         var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
 
         // Заполнение заявки на первую дату
-        cityField.setValue(validUser.getCity());
+        cityField.setValue(invalidNameUser.getCity());
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(firstMeetingDate);
-        nameField.setValue("Артём Грулёв");
-        phoneField.setValue(validUser.getPhone());
+        nameField.setValue(invalidNameUser.getName());
+        phoneField.setValue(invalidNameUser.getPhone());
         agreementCheckbox.$(".checkbox__box").click();
         agreementCheckbox.$(".checkbox__control").shouldBe(selected);
         submitButton.click();
