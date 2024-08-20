@@ -1,10 +1,20 @@
 package ru.netology.delivery.test;
 
 import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.logevents.SelenideLogger;
+
+import com.epam.reportportal.junit5.ReportPortalExtension;
+import com.epam.reportportal.selenide.ReportPortalSelenideEventListener;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.openqa.selenium.Keys;
+
 import ru.netology.delivery.data.DataGenerator;
 
 import static com.codeborne.selenide.Condition.*;
@@ -13,7 +23,7 @@ import static com.codeborne.selenide.Selenide.open;
 
 class DeliveryTest {
 
-    // Объекты тестовых элементов с css-селекторами
+    // Objects of testing elements with css-selectors
     SelenideElement cityField = $("[data-test-id='city'] input");
     SelenideElement dateField = $("[data-test-id='date'] input");
     SelenideElement nameField = $("[data-test-id='name'] input");
@@ -24,9 +34,14 @@ class DeliveryTest {
     SelenideElement replanNotification = $("[data-test-id='replan-notification']");
     SelenideElement replanButton = $("[data-test-id='replan-notification'] .button");
 
+    private static final Logger LOGGER = LogManager.getLogger(DeliveryTest.class);
+
     @BeforeEach
+    @ExtendWith(ReportPortalExtension.class) // Each test reports to ReportPortal
     void setup() {
         open("http://localhost:9999");
+        SelenideLogger.addListener("Report Portal logger", new ReportPortalSelenideEventListener());
+        LOGGER.info("Hello from my simple test");
     }
 
     @Test
@@ -38,7 +53,7 @@ class DeliveryTest {
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
 
-        // Заполнение заявки на первую дату
+        // First date request
         cityField.setValue(validUser.getCity());
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(firstMeetingDate);
@@ -49,7 +64,7 @@ class DeliveryTest {
         submitButton.click();
         successNotification.shouldBe(visible).shouldHave(text(firstMeetingDate));
 
-        // Заполнение заявки на вторую дату
+        // Second date request
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(secondMeetingDate);
         submitButton.click();
@@ -59,12 +74,13 @@ class DeliveryTest {
     }
 
     @Test
+    @DisplayName("Should not plan if invalid city")
     void shouldNotPlanIfInvalidCity() {
         var invalidCityUser = DataGenerator.Registration.generateInvalidCityUser("ru");
         var daysToAddForFirstMeeting = 4;
         var firstMeetingDate = DataGenerator.generateDate(daysToAddForFirstMeeting);
 
-        // Заполнение заявки на первую дату
+        // First date request
         cityField.setValue(invalidCityUser.getCity());
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(firstMeetingDate);
@@ -78,6 +94,7 @@ class DeliveryTest {
     }
 
     @Test
+    @DisplayName("Should plan if name contains specific symbols")
     void shouldPlanIfNameContainsSpecificSymbols() {
         var invalidNameUser = DataGenerator.Registration.generateInvalidNameUser("ru");
         var daysToAddForFirstMeeting = 4;
@@ -85,7 +102,7 @@ class DeliveryTest {
         var daysToAddForSecondMeeting = 7;
         var secondMeetingDate = DataGenerator.generateDate(daysToAddForSecondMeeting);
 
-        // Заполнение заявки на первую дату
+        // First date request
         cityField.setValue(invalidNameUser.getCity());
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(firstMeetingDate);
@@ -96,7 +113,7 @@ class DeliveryTest {
         submitButton.click();
         successNotification.shouldBe(visible).shouldHave(text(firstMeetingDate));
 
-        // Заполнение заявки на вторую дату
+        // Second date request
         dateField.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
         dateField.setValue(secondMeetingDate);
         submitButton.click();
